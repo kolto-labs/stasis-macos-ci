@@ -1,0 +1,51 @@
+# Stasis run config.
+# Copy this file to stasis.toml, set the paths below, then run:
+#   ./stasis check stasis.toml
+#   ./stasis play stasis.toml
+#
+# Stasis writes to your game folder:
+#   - dinput8.dll: the Stasis shim, placed on every start. If another mod's
+#     dinput8.dll is there, Stasis moves it to dinput8.dll.stasis-backup-<id>
+#     first and tells you.
+#   - swkotor.ini: sound and display settings for the run.
+#   - Saves: only if you set pin below.
+
+[run]
+backend = "shim"
+# Folder for recordings. Stasis creates it. Recordings can grow large.
+out_dir = "~/stasis/recordings"
+
+[game]
+# Folder that holds swkotor.exe (KotOR 1, GOG 1.03). Use a copy without KPM.
+dir = "/path/to/kotor"
+# Wine prefix to run the game in. Leave it out to use Wine's default (~/.wine).
+# wineprefix = "~/.wine-kotor"
+# X display for the game. "auto" uses $DISPLAY.
+display = "auto"
+# Turns off address randomization so runs repeat. Needs setarch (util-linux).
+launch_wrapper = "setarch_R"
+# Optional. A folder whose files replace the game's own on every start,
+# including the Saves folder. Your current saves are overwritten.
+# Back them up first.
+# pin = "/path/to/game-copy"
+
+[shim]
+# Seconds to wait for the game to start and the shim to answer.
+connect_timeout_s = 120
+start_timeout_s = 180
+
+# Recording settings. Leave these as they are.
+[store]
+level = 1
+
+[capture]
+every = 30
+
+[seek]
+mode = "restore"
+
+[verify]
+canary_ticks = 8
+
+[replay]
+present = "draw"

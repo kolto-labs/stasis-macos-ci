@@ -1,0 +1,20 @@
+version = 1
+[ui]
+layout = "overlay"
+game_surface = "owner_frame"
+density = "timeline"
+timeline_edge = "bottom"
+[ui.panels]
+editor = false
+[ui.sizing]
+window_width = 800
+window_height = 600
+panel_width = 784
+column_width = 28
+row_height = 16
+piano_height = 100
+[ui.panel_states.transport]
+opacity = 0.90
+[ui.shortcuts]
+# Show or hide the whole TAS interface (rail and editor). Works while the game has focus.
+toggle_visibility = "Ctrl+Shift+F12"

@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1b",
+  "shim_sha256": "6cad963f9befb900784de0fdff7dee63cd8c6ae8846dc2b82c51b4750040c2b6",
+  "packages": [
+    {
+      "csrc": "csrc/kptas.c",
+      "out": "lib/kptas.so"
+    },
+    {
+      "csrc": "csrc/telos_core.c",
+      "out": "lib/telos_core.so"
+    },
+    {
+      "csrc": "csrc/stasis_tools.c",
+      "out": "lib/stasis_tools.so"
+    }
+  ]
+}

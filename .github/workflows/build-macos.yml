@@ -1,0 +1,119 @@
+# Build the Stasis macOS bundle from the source-free CI tree.
+#
+# This workflow NEVER sees plaintext Python. It consumes the committed tree that
+# `tools/release/pack_native.py --emit-ci` produces:
+#
+#   $CI_DIR/csrc/<pkg>.c     obfuscated C extension source (one per package)
+#   $CI_DIR/stage/           the shipped bundle, minus every .py/.pyc, minus any .so/.pyd
+#   $CI_DIR/manifest.json    { version, shim_sha256, packages:[{csrc, out}] }
+#
+# CI compiles each csrc/<pkg>.c into stage/lib/<pkg>.so with clang, then runs the
+# same smoke test the Linux build runs. Commit the emit-ci output under CI_DIR
+# (default: ci-macos/ at the repo root), e.g.
+#   python3 tools/release/pack_native.py <version> --emit-ci ci-macos
+name: build-macos
+
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  CI_DIR: ci-macos   # directory holding csrc/, stage/, manifest.json (change if you commit it elsewhere)
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14   # Apple Silicon (arm64)
+            arch: arm64
+          - runner: macos-13   # Intel (x86_64)
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PySide6 (full import smoke needs it)
+        run: python -m pip install --upgrade pip && python -m pip install PySide6
+
+      - name: Compile each package to stage/lib/<pkg>.so with clang
+        working-directory: ${{ env.CI_DIR }}
+        run: |
+          set -euo pipefail
+          PYINC=$(python -c 'import sysconfig; print(sysconfig.get_path("include"))')
+          echo "Python include dir: $PYINC"
+          # manifest.json maps csrc/<pkg>.c -> lib/<pkg>.so
+          python - <<'PY' > /tmp/pkgs.tsv
+          import json
+          m = json.load(open("manifest.json"))
+          for p in m["packages"]:
+              print(p["csrc"] + "\t" + p["out"])
+          PY
+          while IFS=$'\t' read -r csrc out; do
+            [ -n "$csrc" ] || continue
+            echo "clang: $csrc -> stage/$out"
+            clang -O2 -bundle -undefined dynamic_lookup -fno-common \
+              -I"$PYINC" -o "stage/$out" "$csrc"
+          done < /tmp/pkgs.tsv
+          ls -l stage/lib/*.so
+
+      - name: Smoke test the compiled bundle
+        working-directory: ${{ env.CI_DIR }}/stage
+        env:
+          QT_QPA_PLATFORM: offscreen
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          chmod +x ./stasis
+          # Clear inherited PYTHONPATH so the bundle resolves only from its own lib/.
+          unset PYTHONPATH KPTAS_SRC || true
+          ./stasis --version
+          ./stasis --help > /dev/null
+          # check on the example runs and reports fixes; a nonzero exit means "needs fixing", which is fine.
+          ./stasis check stasis.toml.example || echo "check reported fixes (expected on a bare runner)"
+          # Import every embedded module out of the .so-backed lib; assert none fail.
+          PYTHONPATH="$PWD/lib" python - <<'PY'
+          import pkgutil, importlib, kptas, kptas.telos, telos_core, stasis_tools.launcher
+          bad = []
+          for pkg in (kptas, telos_core):
+              for m in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + '.'):
+                  try:
+                      importlib.import_module(m.name)
+                  except Exception as e:
+                      bad.append((m.name, repr(e)[:120]))
+          print('modules ok; failures:', bad)
+          assert bad == [], bad
+          PY
+
+      - name: Assert no .py/.pyc shipped in the bundle
+        working-directory: ${{ env.CI_DIR }}/stage
+        run: |
+          set -euo pipefail
+          left=$(find . \( -name '*.py' -o -name '*.pyc' \) -print)
+          if [ -n "$left" ]; then
+            echo "FAIL: plaintext source in the bundle:"; echo "$left"; exit 1
+          fi
+          echo "no .py/.pyc in the bundle"
+
+      - name: Package the bundle
+        id: pack
+        working-directory: ${{ env.CI_DIR }}
+        run: |
+          set -euo pipefail
+          VERSION=$(python -c 'import json;print(json.load(open("manifest.json"))["version"])')
+          ARCH="${{ matrix.arch }}"
+          OUT="stasis-${VERSION}-macos-${ARCH}.tar.gz"
+          tar -C stage -czf "$OUT" .
+          echo "artifact=$OUT" >> "$GITHUB_OUTPUT"
+          echo "name=stasis-${VERSION}-macos-${ARCH}" >> "$GITHUB_OUTPUT"
+          ls -l "$OUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.name }}
+          path: ${{ env.CI_DIR }}/${{ steps.pack.outputs.artifact }}

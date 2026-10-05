@@ -1,0 +1,78 @@
+#!score v1 game=k1
+# K1 key bindings as $aliases, read from the local install on 2026-09-29.
+# What was checked in a local K1 install:
+# - swkotor.ini has no key-mapping section.
+# - override/ has no keymap.2da.
+# - patch.erf holds keymap.2da and bindablekeys.2da, which shadow the copies
+#   in data/2da.bif. The bindings below come from the patch.erf copies.
+# - In each row, the "character" column and the key index in "language0"
+#   (bindablekeys row + 6) name the same key.
+# Labels come from dialog.tlk. Rows the 2da marks disabled are left out.
+# Rebinding keys in the game makes this file wrong. Check it again first.
+
+# Movement and camera
+@alias move_forward = w              # ActionUp: Move Forward
+@alias move_back = s                 # ActionDown: Move Backwards
+@alias move_left = z                 # ActionLeft: Move Left
+@alias move_right = c                # ActionRight: Move Right
+@alias camera_left = a               # CameraRotateLeft: Pan Camera Left
+@alias camera_right = d              # CameraRotateRight: Pan Camera Right
+@alias walk = b                      # WALKMODIFY
+@alias freelook = capslock           # Freelook: Free look
+@alias look_about = lctrl            # LeftLookabout: Look About
+@alias alt_action = lshift           # AlternateActions: Alternate Action
+@alias select_prev = q               # SelectPrev: Select Previous (Left)
+@alias select_next = e               # SelectNext: Select Next (Right)
+
+# Game
+@alias game_menu = esc               # GUI: Game Menu
+@alias pause = space                 # Pause: Pause Game
+@alias pause_key = pause             # Pause: Pause Game (fixed key)
+@alias qsave = f4                    # Quicksave: Quick Save
+@alias qload = f5                    # QUICKLOAD: Quick Load
+@alias change_leader = tab           # ChangeChar: Change Leader
+@alias solo_mode = v                 # PartyActive: Solo Mode
+@alias equipment = u                 # Equip: Equipment Screen
+@alias inventory = i                 # Inventory: Inventory Screen
+@alias character = p                 # Character: Character Screen
+@alias skills_feats = k              # SkillsAndFeats: Skills and Feats
+@alias messages = j                  # Messages: Messages Screen
+@alias quests = l                    # Quests: Quest Screen
+@alias map = m                       # Map: Map Screen
+@alias options = o                   # Options: Options Screen
+@alias tooltips = t                  # ToolTips: ToolTips
+@alias stealth = g                   # STEALTH: Toggle Stealth
+@alias prev_menu = q                 # PrevMenu: Previous Menu
+@alias next_menu = e                 # NextMenu: Next Menu
+
+# Combat
+@alias default_action = r            # DefaultAction: Default Action
+@alias cancel_combat = f             # CancleCombat: Cancel combat
+@alias flourish = x                  # Flourish: Flourish Weapon
+@alias clear_action = y              # ClearOneAction: Clear Combat Action
+@alias act_left = 1                  # TargetLeftAct: Activate Left Action
+@alias act_middle = 2                # TargetMiddleAct: Activate Middle Action
+@alias act_right = 3                 # TargetRightAct: Activate Right Action
+@alias friendly_power = 4            # PersonalPowerAct: Activate Friendly Power
+@alias medical_item = 5              # PersonalMedicalAct: Activate Medical Item
+@alias other_item = 6                # PersonalOtherAct: Activate Non-medical Item
+@alias mine = 7                      # PersonalMinesAct: Activate Mine
+
+# Dialog replies (fixed keys)
+@alias reply1 = 1                    # Dialog1
+@alias reply2 = 2                    # Dialog2
+@alias reply3 = 3                    # Dialog3
+@alias reply4 = 4                    # Dialog4
+@alias reply5 = 5                    # Dialog5
+@alias reply6 = 6                    # Dialog6
+@alias reply7 = 7                    # Dialog7
+@alias reply8 = 8                    # Dialog8
+@alias reply9 = 9                    # Dialog9
+
+# Minigames
+@alias mg_action = space             # MGshoot: Mini-Game Action
+@alias mg_pause = esc                # PauseMinigame: Pause Mini-Game
+@alias mg_up = w                     # MGActionUp
+@alias mg_down = s                   # MGActionDown
+@alias mg_left = a                   # MGActionLeft
+@alias mg_right = d                  # MGActionRight
