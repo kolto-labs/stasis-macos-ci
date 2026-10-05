@@ -72,6 +72,8 @@ jobs:
           chmod +x ./stasis
           # Clear inherited PYTHONPATH so the bundle resolves only from its own lib/.
           unset PYTHONPATH KPTAS_SRC || true
+          # Pin the launcher to the controlled interpreter (the one with PySide6), not a stray Homebrew python.
+          export STASIS_PYTHON="$(python -c 'import sys; print(sys.executable)')"
           ./stasis --version
           ./stasis --help > /dev/null
           # check on the example runs and reports fixes; a nonzero exit means "needs fixing", which is fine.

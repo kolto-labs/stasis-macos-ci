@@ -1,21 +1,12 @@
 #!/bin/sh
-# Stasis launcher. Finds Python 3.11 or newer, then runs the bundled launcher.
-# Set STASIS_PYTHON to pick the interpreter yourself.
+# Stasis by Kolto Labs. Native bundle entry.
 HERE=$(cd "$(dirname "$0")" && pwd)
-# Keep compiled files out of the release folder so it stays equal to MANIFEST.sha256.
-PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-${XDG_CACHE_HOME:-$HOME/.cache}/stasis/pycache}"
-export PYTHONPYCACHEPREFIX
-if [ -n "$STASIS_PYTHON" ]; then
-    if "$STASIS_PYTHON" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
-        exec "$STASIS_PYTHON" "$HERE/lib/stasis_tools/launcher.py" "$@"
-    fi
-    echo "stasis: STASIS_PYTHON ($STASIS_PYTHON) is not Python 3.11 or newer." >&2
-    exit 1
-fi
+export PYTHONPATH="$HERE/lib${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1
+if [ -n "$STASIS_PYTHON" ]; then exec "$STASIS_PYTHON" -m stasis_tools.launcher "$@"; fi
 for py in python3.14 python3.13 python3.12 python3.11 python3; do
     command -v "$py" >/dev/null 2>&1 || continue
     if "$py" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
-        exec "$py" "$HERE/lib/stasis_tools/launcher.py" "$@"
+        exec "$py" -m stasis_tools.launcher "$@"
     fi
 done
 echo "stasis: Python 3.11 or newer is required. Install it, or set STASIS_PYTHON to its path." >&2
