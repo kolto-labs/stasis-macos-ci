@@ -26,10 +26,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-14   # Apple Silicon (arm64)
-            arch: arm64
-          - runner: macos-13   # Intel (x86_64)
-            arch: x86_64
+          - runner: macos-14   # Apple Silicon (arm64) — modern Macs. Intel (macos-13) runners are
+            arch: arm64        # scarce/retiring on GitHub; add a macos-13 entry back if you need x86_64.
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
